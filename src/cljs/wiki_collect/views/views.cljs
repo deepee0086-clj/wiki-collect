@@ -11,14 +11,39 @@
     (fn []
       [:div.counter [:span "You have " @collections-count " collection" (if plural "s") ]])))
 
-(def content-tree []
-  (let [collections-count (rf subscribe [:collections])]
-    ))
+;; TODO: Make the links actions that either fetch from cache or lazy load from http.
+(defn- change-selected
+  [title]
+  (js/console.log "title: " title)
+  (rf/dispatch [:change-selected-title title]))
 
+(defn- collection-list-item
+  [{:keys [title]}]
+  (let [title-display (normal-title title)]
+    [:li
+     [:a
+      {:href "#"
+       :on-click #(change-selected title)}
+      title-display]]))
+
+(defn collection-list
+  []
+  (let [collections @(rf/subscribe [:collections])]
+    [:div
+     [:ul
+      (map
+       collection-list-item
+       collections)]]))
+
+(defn collection-viewer
+  []
+  (let [selected-collection @(rf/subscribe [:selected-collection])]
+    [:span "Currently viewing: " (normal-title selected-collection)]))
 
 (defn main-panel []
-  (let [name (rf/subscribe [:name])]
-    (fn []
-      [:div
-       [collection-counter]
-       [:span "Currently viewing: " (normal-title "Kosh_Naranek")]])))
+  []
+  (fn []
+    [:div
+     [collection-counter]
+     [collection-list]
+     [collection-viewer]]))
